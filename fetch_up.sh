@@ -53,8 +53,8 @@ get_domain() {
 }
 
 # Initialize counters
-declare -A total_checks
-declare -A up_counts
+declare -A check_sum
+declare -A up_tally
 
 config_file="endpoints.yaml"
 
@@ -68,18 +68,18 @@ while true; do
         status=$(check_endpoint "$name" "$url" "$headers" "$body")
         domain=$(get_domain "$url")
 
-        total_checks[$domain]=$(( ${total_checks[$domain]:-0} + 1 ))
+        check_sum[$domain]=$(( ${check_sum[$domain]:-0} + 1 ))
 
         if [ "$status" == "UP" ]; then
-            up_counts[$domain]=$(( ${up_counts[$domain]:-0} + 1 ))
+            up_tally[$domain]=$(( ${up_tally[$domain]:-0} + 1 ))
         fi
     done < endpoints.txt
 
     # Log the results for each domain
     echo -e "\nCurrent availability status:"
-    for domain in "${!total_checks[@]}"; do
-        total=${total_checks[$domain]}
-        up=${up_counts[$domain]}
+    for domain in "${!check_sum[@]}"; do
+        total=${check_sum[$domain]}
+        up=${up_tally[$domain]}
         if [ "$total" -eq 0 ]; then
             percentage=0
         else
